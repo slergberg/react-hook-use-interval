@@ -1,47 +1,34 @@
-import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react'
 
-export function useInterval(callback, interval, options = {}) {
+export default function useInterval(callback, interval, options = {}) {
   const { autoStart = true } = options
 
-  const [isActive, setActive] = useState(autoStart)
+  const [isActive, setIsActive] = useState(autoStart)
+  const start = useCallback(() => setIsActive(true), [setIsActive])
+  const stop = useCallback(() => setIsActive(false), [setIsActive])
 
-  const clearRef = useRef()
-  const startRef = useRef()
-  const intervalRef = useRef()
+  const callbackRef = useRef()
+  useEffect(() => {
+    callbackRef.current = callback
+  }, [callback])
 
   useEffect(() => {
-    startRef.current = () => {
-      setActive(true)
-      intervalRef.current = setInterval(callback, interval)
+    function tick() {
+      callbackRef.current()
     }
 
-    clearRef.current = () => {
-      setActive(false)
-      clearInterval(intervalRef.current)
+    if (isActive && !!interval) {
+      const intervalId = setInterval(tick, interval)
+
+      return () => clearInterval(intervalId)
     }
 
-    return clearRef.current
-  }, [callback, interval])
+    return () => {}
+  }, [interval, isActive])
 
-  useEffect(() => {
-    if (autoStart) {
-      startRef.current()
-    }
-  }, [autoStart, startRef])
-
-  const clear = useCallback(
-    (...args) => {
-      clearRef.current(...args)
-    },
-    [clearRef],
-  )
-
-  const start = useCallback(
-    (...args) => {
-      startRef.current(...args)
-    },
-    [startRef],
-  )
-
-  return useMemo(() => ({ clear, isActive, start }), [clear, isActive, start])
+  return {
+    isActive,
+    start,
+    stop,
+  }
 }
