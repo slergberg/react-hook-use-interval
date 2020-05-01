@@ -19,13 +19,13 @@ jobs:
         env:
           CI: true
       - name: Start coverage report
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@v1.1.1
         with:
           github-token: ${{ secrets.github_token }}
           parallel: true
           path-to-lcov: ./coverage/lcov.info
       - name: Finish coverage report
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@v1.1.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
