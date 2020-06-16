@@ -1,0 +1,25 @@
+name: codeql-analysis
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: 0 12 * * 1
+
+jobs:
+  codeql-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2.2.0
+        with:
+          fetch-depth: 2
+      - name: Checkout the head of pull request
+        run: git checkout HEAD^2
+        if: ${{ github.event_name == 'pull_request' }}
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+      - name: Autobuild CodeQL
+        uses: github/codeql-action/autobuild@v1
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v1
